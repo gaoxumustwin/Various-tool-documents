@@ -2,7 +2,7 @@
 
 ## 设备
 
-- AutoDL CUDA12.1
+- AutoDL CUDA12.1 **(因为要装VLLM)**
   - vllm推理Qwen3 8B  端口号：
   - mysql   端口号 3306
 - windows docker
@@ -386,6 +386,8 @@ http://127.0.0.1:5000/student
 ```
 
 ## dify连接
+
+参考：https://blog.csdn.net/qq_43679365/article/details/147045157
 
 进入到dify/docker文件夹执行：docker compose up -d
 
