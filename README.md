@@ -24,3 +24,5 @@ Ollma： Windows使用Ollma的简单笔记
 Opencompass： 模型评估框架笔记
 
 SWIFT： 阿里开发的大模型训练框架
+
+Gradio_Flask_LLM_MySQL： 使用Graido + Flask + Qwen3 8B(vLLM) + Mysql的数据库查询demo
