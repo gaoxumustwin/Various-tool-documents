@@ -38,7 +38,7 @@ sudo service mysql status
 
 模型
 
-Qwen3 8B
+Qwen3 8B  效果非常的好
 
 ```python
 # 模型下载   
@@ -89,6 +89,74 @@ chat_response = client.chat.completions.create(
 )
 print("Chat response:", chat_response)
 ```
+
+比较难的sql测试问题：
+
+```
+你能帮我求出所有学生的数学成绩的平均数吗？
+请帮我查出王小明和李华的语文成绩相差多少分？
+请查出所有同学的学科平均分？
+找出各科成绩都高于该科目平均成绩的"全能型"学生
+请你帮我查出班上数学成绩最高和最低的相差多少分
+```
+
+调用代码：
+
+~~~python
+def text_2_sql(text):
+
+    prompt = f"""假设你是一个资深的MySQL数据库专家，你能将我给你提交的任务转换成MySQL语句并输出。
+请注意：
+1. 所有的操作均在名字为student_scores的数据库和student_scores的表上进行。
+2. MySQL数据库共有 id、name、chinese、math、english、physics、chemistry、biology、history、geography、politics、total_score共计12列。
+3. 拒绝所有的增加、删除和修改操作，如果用户提出了这三个操作，直接返回拒绝；
+样例如下：
+```
+用户输入：请帮查找出在名字为王小明的语文成绩是多少？
+输出：SELECT chinese FROM student_scores WHERE name = '王小明';
+```
+```
+用户输入：请帮查找出英语成绩大于60分的学生名字都有谁？
+输出：SELECT name FROM student_scores WHERE english > 60;
+```
+```
+用户输入：请帮查找出数学成绩小于90分的学生学号是什么？
+输出：SELECT id FROM student_scores WHERE math < 90;
+```
+```
+用户输入：请查找出英语成绩大于70分的学生的数学成绩是多少？
+输出：SELECT math FROM student_scores WHERE english > 70;
+```
+```
+用户输入：{text}。
+输出：
+```
+"""
+
+    chat_response = client.chat.completions.create(
+        model= model_name, # "Qwen3-8B",
+        temperature=0.5,
+        top_p=0.7,
+        presence_penalty=1.5,
+    	extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+        messages=[
+            {"role": "system", "content": "你是一个数据库助手"},
+            {"role": "user", "content": prompt},
+        ],
+    )
+    sql = chat_response.choices[0].message.content
+
+    # 使用正则表达式提取 SQL 语句
+    match = re.search(r'```(?:sql)?\n(.*?)\n```', sql, re.DOTALL)
+
+    if match:
+        sql_query = match.group(1).strip()
+
+        return sql_query
+    
+    else:
+        return sql
+~~~
 
 ## AutoDL端口映射
 
@@ -146,6 +214,7 @@ def text_2_sql(text):
 请注意：
 1. 所有的操作均在名字为student_scores的数据库和student_scores的表上进行。
 2. MySQL数据库共有 id、name、chinese、math、english、physics、chemistry、biology、history、geography、politics、total_score共计12列。
+3. 拒绝所有的增加、删除和修改操作，如果用户提出了这三个操作，直接返回拒绝；
 样例如下：
 ​```
 用户输入：请帮查找出在名字为王小明的语文成绩是多少？
@@ -197,12 +266,10 @@ def get_sql_result(sql):
     # 数据库的操作简易加上异常吃力
     try:
         with connection.cursor() as cursor:
-            # 执行sql
             cursor.execute(sql)
-            results = cursor.fetchall()
-            return results
-    finally:
-        connection.close()
+            return cursor.fetchall()
+    except Exception as e:
+        return f"查询错误: {str(e)}"
 
     return "查询错误"
 
@@ -210,7 +277,10 @@ def get_sql_result(sql):
 def get_result():
 
     data = request.get_json()
+    print(data)
+
     natural_language = data.get("text", "").strip()
+    print(natural_language)
 
     if not natural_language:
         return jsonify({"error": "缺少查询内容"}), 400
@@ -252,6 +322,7 @@ if __name__ == "__main__":
     
     # 应用启动
     app.run(debug=True)
+    # 请帮查找出在名字为王小明的语文成绩是多少？
 ```
 
 执行结果如下：
@@ -273,8 +344,8 @@ def get_sql_result(sql):
             cursor.execute(sql)
             results = cursor.fetchall()
             return results
-    finally:
-        connection.close()
+    Except error as e:
+        print("出现问题")
 
     return "查询错误"
 ```
