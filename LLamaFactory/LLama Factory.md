@@ -47,6 +47,8 @@ pip install -e ".[metrics]" # -e是额外选择安装依赖项 即pip安装基�
 
 注意：遇到包冲突时，可使用 `pip install --no-deps -e .` 解决。
 
+**安装后的LLaMA Factory是安装在LLaMA-Factory目录下面，而不是python环境的site-package下面，便于修改源码，所以安装后不可乱移LLaMA-Factory**
+
 
 
 ## LLama Factory工程
@@ -203,11 +205,7 @@ llamafactory-cli的debug在后面
 
 工程和算法上常用llamafactory-cli 
 
-### llamafactory-cli 的一些指令
-
-参考：https://github.com/hiyouga/LLaMA-Factory/blob/main/examples/README_zh.md
-
-
+**llamafactory-cli 的一些指令**，参考：https://github.com/hiyouga/LLaMA-Factory/blob/main/examples/README_zh.md
 
 
 
@@ -310,10 +308,6 @@ mv /root/.cache/modelscope/hub/Qwen/Qwen2-0___5B-Instruct /root/models
 	}
 }
 ```
-
-
-
-
 
 
 
